@@ -8,6 +8,7 @@
 #
 property manifestShape : "NoteShape"
 property thePlistBuddy : "/usr/libexec/PlistBuddy"
+property manifestFont : "Helvetica"
 
 
 #Prompt for  Manifests Directory
@@ -39,7 +40,7 @@ set manifestList to (list folder manifestsDirectory without invisibles)
 #
 repeat with theManifests in manifestList
 	set currentManifest to theManifests
-	drawShape(manifestShape, currentManifest, currentManifest)
+	drawShape(manifestShape, currentManifest, currentManifest, manifestFont)
 end repeat
 
 
@@ -72,10 +73,10 @@ end link
 
 
 #draw shapes function
-on drawShape(shapeProp, textProp, nameProp)
+on drawShape(shapeProp, textProp, nameProp, fontProp)
 	tell application id "com.omnigroup.OmniGraffle6"
 		tell canvas of front window
-			make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, font:"HelveticaNeue", size:"12", text:textProp}, origin:{135.0, 99.0}, user name:nameProp}
+			make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, font:fontProp, size:"12", text:textProp}, origin:{135.0, 99.0}, user name:nameProp}
 		end tell
 		layout
 	end tell
