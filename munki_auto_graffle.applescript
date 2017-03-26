@@ -54,13 +54,19 @@ repeat with theItems in manifestList
 	set currentManifestPath to POSIX path of manifestsDirectory & currentContainerManifest
 	try
 		repeat
-			set currentIncludedManifest to do shell script thePlistBuddy & " -c \"print " & ":included_manifests:" & currentIndex & "\" " & currentManifestPath
+			--set currentIncludedManifest to do shell script thePlistBuddy & " -c \"print " & ":included_manifests:" & currentIndex & "\" " & currentManifestPath
+			set currentIncludedManifest to readKey(currentManifestPath, "included_manifests", currentIndex)
 			link(currentIncludedManifest, currentContainerManifest, "straight")
 			set currentIndex to currentIndex + 1
 		end repeat
 	end try
 end repeat
 
+--plist buddy function to pull data from a specified array and key by array name and key index.  
+on readKey(targetFile, targetArray, targetKeyIndex)
+	set keyValue to do shell script "/usr/libexec/PlistBuddy" & " -c \"print " & ":" & targetArray & ":" & targetKeyIndex & "\" " & targetFile
+	return keyValue
+end readKey
 
 --link function
 on link(originShape, targetShape, propLineType)
