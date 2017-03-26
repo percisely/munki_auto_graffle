@@ -6,6 +6,7 @@
 
 --Known Issues:
 ---1. Doesn't tolerate space in path to manifests folder
+---2. Doesn't work with installers nested in conditional_items 
 
 --Color Hints
 ---Smokey Fern: {0.137255, 0.368627, 0.000000}
@@ -27,19 +28,19 @@ property manifestArrowHeadType : "FilledArrow"
 
 property managedInstallLinkColor : {0.137255, 0.368627, 0.0}
 property managedInstallLinkStyle : 0
-property managedInstallArrowType : "FilledDoubleArrow"
+property managedInstallArrowHeadType : "FilledDoubleArrow"
 
 property optionalInstallLinkColor : {0.0, 0.215686, 0.462745}
 property optionalInstallLinkStyle : 1
-property optionalInstallArrowType : ""
+property optionalInstallArrowHeadType : ""
 
 property managedUpdateLinkColor : {0.137255, 0.368627, 0.0}
 property managedUpdateLinkStyle : 1
-property managedUpdateArrowType : "FilledDoubleArrow"
+property managedUpdateArrowHeadType : "FilledDoubleArrow"
 
 property managedUninstallLinkColor : {0.694118, 0.0, 0.109804}
 property managedUninstallLinkStyle : 9
-property managedUninstallArrowType : "SharpBackArrow"
+property managedUninstallArrowHeadType : "SharpBackArrow"
 
 
 --Prompt for  Manifests Directory
@@ -97,7 +98,7 @@ repeat with i in manifestList
 		repeat
 			set currentIncludedManifest to readKey(currentManifestPath, "included_manifests", currentIndex)
 			drawShape(manifestShape, currentIncludedManifest, currentIncludedManifest, manifestFont)
-			link(currentIncludedManifest, currentContainerManifest, manifestLinkColor, defaultLineType)
+			link(currentIncludedManifest, currentContainerManifest, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
 			layoutGraffle()
 			set currentIndex to currentIndex + 1
 		end repeat
@@ -109,7 +110,7 @@ repeat with i in manifestList
 			repeat
 				set currentManagedInstall to readKey(currentManifestPath, "managed_installs", currentIndex)
 				drawShape(installShape, currentManagedInstall, currentManagedInstall, installFont)
-				link(currentManagedInstall, currentContainerManifest, managedInstallLinkColor, defaultLineType)
+				link(currentManagedInstall, currentContainerManifest, managedInstallLinkColor, defaultLineType, managedInstallArrowHeadType, managedInstallLinkStyle)
 				layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
@@ -122,7 +123,7 @@ repeat with i in manifestList
 			repeat
 				set currentOptionalInstall to readKey(currentManifestPath, "optional_installs", currentIndex)
 				drawShape(installShape, currentOptionalInstall, currentOptionalInstall, installFont)
-				link(currentOptionalInstall, currentContainerManifest, optionalInstallLinkColor, defaultLineType)
+				link(currentOptionalInstall, currentContainerManifest, optionalInstallLinkColor, defaultLineType, optionalInstallArrowHeadType, optionalInstallLinkStyle)
 				layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
@@ -135,7 +136,7 @@ repeat with i in manifestList
 			repeat
 				set currentManagedUpdate to readKey(currentManifestPath, "managed_updates", currentIndex)
 				drawShape(installShape, currentManagedUpdate, currentManagedUpdate, installFont)
-				link(currentManagedUpdate, currentContainerManifest, managedUpdateLinkColor, defaultLineType)
+				link(currentManagedUpdate, currentContainerManifest, managedUpdateLinkColor, defaultLineType, managedUpdateArrowHeadType, managedUpdateLinkStyle)
 				layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
@@ -148,7 +149,7 @@ repeat with i in manifestList
 			repeat
 				set currentManagedUninstall to readKey(currentManifestPath, "managed_uninstalls", currentIndex)
 				drawShape(installShape, currentManagedUninstall, currentManagedUninstall, installFont)
-				link(currentManagedUninstall, currentContainerManifest, managedUninstallLinkColor, defaultLineType)
+				link(currentManagedUninstall, currentContainerManifest, managedUninstallLinkColor, defaultLineType, managedUninstallArrowHeadType, managedUninstallLinkStyle)
 				layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
@@ -169,10 +170,10 @@ on readKey(targetFile, targetArray, targetKeyIndex)
 end readKey
 
 --link function
-on link(originShape, targetShape, propLineColor, propLineType)
+on link(originShape, targetShape, propLineColor, propLineType, propHeadType, propStrokePattern)
 	tell application "OmniGraffle"
 		tell canvas of front window
-			connect shape originShape to shape targetShape with properties {thickness:1, stroke color:propLineColor, draws shadow:false, head type:"FilledArrow", stroke pattern:0, line type:propLineType}
+			connect shape originShape to shape targetShape with properties {thickness:1, stroke color:propLineColor, draws shadow:false, head type:propHeadType, stroke pattern:propStrokePattern, line type:propLineType}
 			layout
 		end tell
 	end tell
