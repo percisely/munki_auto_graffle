@@ -49,6 +49,7 @@ set manifestList to (list folder manifestsDirectory without invisibles)
 --Will probably break if a manifest contains a manifest that doesn't exist.  
 --Potentially could be made better by using plistlib.readPlist
 repeat with i in manifestList
+	layoutGraffle()
 	set currentIndex to 0
 	set currentContainerManifest to i
 	set currentManifestPath to POSIX path of manifestsDirectory & currentContainerManifest
@@ -59,10 +60,15 @@ repeat with i in manifestList
 			set currentIncludedManifest to readKey(currentManifestPath, "included_manifests", currentIndex)
 			drawShape(manifestShape, currentIncludedManifest, currentIncludedManifest, manifestFont)
 			link(currentIncludedManifest, currentContainerManifest, "straight")
+			layoutGraffle()
 			set currentIndex to currentIndex + 1
 		end repeat
 	end try
 end repeat
+
+linesToBack()
+
+end
 
 --plist buddy function to pull data from a specified array and key by array name and key index.  
 on readKey(targetFile, targetArray, targetKeyIndex)
@@ -97,3 +103,23 @@ on drawShape(shapeProp, textProp, nameProp, fontProp)
 		layout
 	end tell
 end drawShape
+
+--layout function, so I can add it without cluttering code
+on layoutGraffle()
+	tell application "OmniGraffle"
+		tell canvas of front window
+			layout
+		end tell
+	end tell
+end layoutGraffle
+
+--lines to back layer function
+on linesToBack()
+	tell application "OmniGraffle"
+		tell canvas of front window
+			set lineLayer to make new layer at end of layers with properties {name:"Lines", visible:true}
+			set layer of every line to lineLayer
+		end tell
+	end tell
+end linesToBack
+
