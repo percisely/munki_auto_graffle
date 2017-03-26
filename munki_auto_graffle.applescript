@@ -45,6 +45,14 @@ property managedUninstallArrowType : "SharpBackArrow"
 --Prompt for  Manifests Directory
 set manifestsDirectory to (choose folder with prompt "select Munki manifests directory")
 
+--Prompt for mode.
+set displayInstallChoice to display dialog "Include Unconditional Installs and Uninstalls?" buttons {"Include Installs", "Manifests Only"} default button "Manifests Only"
+set currentInstallChoice to button returned of displayInstallChoice
+if currentInstallChoice contains "Include Installs" then
+	set theDataChoicesList to {"included_manifests", "managed_installs", "optional_installs", "managed_uninstalls"}
+else if currentInstallChoice contains "Manifests Only" then
+	set theDataChoicesList to {"included_manifests"}
+end if
 
 --Fire up OmniGraffle and make a new document
 ---object separation property not working
@@ -95,50 +103,58 @@ repeat with i in manifestList
 		end repeat
 		set currentIndex to 0
 	end try
-	--get managed installs, draw and link
-	try
-		repeat
-			set currentManagedInstall to readKey(currentManifestPath, "managed_installs", currentIndex)
-			drawShape(installShape, currentManagedInstall, currentManagedInstall, installFont)
-			link(currentManagedInstall, currentContainerManifest, managedInstallLinkColor, defaultLineType)
-			layoutGraffle()
-			set currentIndex to currentIndex + 1
-		end repeat
-		set currentIndex to 0
-	end try
-	--get optional installs, draw and link
-	try
-		repeat
-			set currentOptionalInstall to readKey(currentManifestPath, "optional_installs", currentIndex)
-			drawShape(installShape, currentOptionalInstall, currentOptionalInstall, installFont)
-			link(currentOptionalInstall, currentContainerManifest, optionalInstallLinkColor, defaultLineType)
-			layoutGraffle()
-			set currentIndex to currentIndex + 1
-		end repeat
-		set currentIndex to 0
-	end try
-	--get managed updates, draw and link
-	try
-		repeat
-			set currentManagedUpdate to readKey(currentManifestPath, "managed_updates", currentIndex)
-			drawShape(installShape, currentManagedUpdate, currentManagedUpdate, installFont)
-			link(currentManagedUpdate, currentContainerManifest, managedUpdateLinkColor, defaultLineType)
-			layoutGraffle()
-			set currentIndex to currentIndex + 1
-		end repeat
-		set currentIndex to 0
-	end try
-	--get managed uninstalls, draw and link
-	try
-		repeat
-			set currentManagedUninstall to readKey(currentManifestPath, "managed_uninstalls", currentIndex)
-			drawShape(installShape, currentManagedUninstall, currentManagedUninstall, installFont)
-			link(currentManagedUninstall, currentContainerManifest, managedUninstallLinkColor, defaultLineType)
-			layoutGraffle()
-			set currentIndex to currentIndex + 1
-		end repeat
-		set currentIndex to 0
-	end try
+	if theDataChoicesList contains "managed_installs" then
+		--get managed installs, draw and link
+		try
+			repeat
+				set currentManagedInstall to readKey(currentManifestPath, "managed_installs", currentIndex)
+				drawShape(installShape, currentManagedInstall, currentManagedInstall, installFont)
+				link(currentManagedInstall, currentContainerManifest, managedInstallLinkColor, defaultLineType)
+				layoutGraffle()
+				set currentIndex to currentIndex + 1
+			end repeat
+			set currentIndex to 0
+		end try
+	end if
+	if theDataChoicesList contains "optional_installs" then
+		--get optional installs, draw and link
+		try
+			repeat
+				set currentOptionalInstall to readKey(currentManifestPath, "optional_installs", currentIndex)
+				drawShape(installShape, currentOptionalInstall, currentOptionalInstall, installFont)
+				link(currentOptionalInstall, currentContainerManifest, optionalInstallLinkColor, defaultLineType)
+				layoutGraffle()
+				set currentIndex to currentIndex + 1
+			end repeat
+			set currentIndex to 0
+		end try
+	end if
+	if theDataChoicesList contains "managed_updates" then
+		--get managed updates, draw and link
+		try
+			repeat
+				set currentManagedUpdate to readKey(currentManifestPath, "managed_updates", currentIndex)
+				drawShape(installShape, currentManagedUpdate, currentManagedUpdate, installFont)
+				link(currentManagedUpdate, currentContainerManifest, managedUpdateLinkColor, defaultLineType)
+				layoutGraffle()
+				set currentIndex to currentIndex + 1
+			end repeat
+			set currentIndex to 0
+		end try
+	end if
+	if theDataChoicesList contains "managed_uninstalls" then
+		--get managed uninstalls, draw and link
+		try
+			repeat
+				set currentManagedUninstall to readKey(currentManifestPath, "managed_uninstalls", currentIndex)
+				drawShape(installShape, currentManagedUninstall, currentManagedUninstall, installFont)
+				link(currentManagedUninstall, currentContainerManifest, managedUninstallLinkColor, defaultLineType)
+				layoutGraffle()
+				set currentIndex to currentIndex + 1
+			end repeat
+			set currentIndex to 0
+		end try
+	end if
 	
 end repeat
 
@@ -156,7 +172,7 @@ end readKey
 on link(originShape, targetShape, propLineColor, propLineType)
 	tell application "OmniGraffle"
 		tell canvas of front window
-			connect shape originShape to shape targetShape with properties {thickness:1, stroke color:propLineColor, head type:"FilledArrow", stroke pattern:0, line type:propLineType}
+			connect shape originShape to shape targetShape with properties {thickness:1, stroke color:propLineColor, draws shadow:false, head type:"FilledArrow", stroke pattern:0, line type:propLineType}
 			layout
 		end tell
 	end tell
@@ -173,7 +189,7 @@ on drawShape(shapeProp, textProp, nameProp, fontProp)
 				return f
 			on error
 				-- not found - make a new one
-				make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, font:fontProp, size:"12", text:textProp}, origin:{135.0, 99.0}, user name:nameProp, tag:nameProp}
+				make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, draws shadow:false, font:fontProp, size:"12", text:textProp}, origin:{135.0, 99.0}, user name:nameProp, tag:nameProp}
 			end try
 		end tell
 		layout
