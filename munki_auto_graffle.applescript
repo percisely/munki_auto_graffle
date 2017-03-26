@@ -7,9 +7,39 @@
 --Known Issues:
 ---1. Doesn't tolerate space in path to manifests folder
 
+--Color Hints
+---Smokey Fern: {0.137255, 0.368627, 0.000000}
+---Ocean: {0.000000, 0.215686, 0.462745}
+---Cayane: {0.694118, 0.000000, 0.109804}
+
+property defaultLineType : "Straight"
+
 property manifestShape : "NoteShape"
-property thePlistBuddy : "/usr/libexec/PlistBuddy"
+property installShape : "Cube"
+
 property manifestFont : "Helvetica"
+property installFont : "Helvetica"
+
+
+property manifestLinkColor : {0, 0, 0}
+property manifestLinkStyle : 0
+property manifestArrowHeadType : "FilledArrow"
+
+property managedInstallLinkColor : {0.137255, 0.368627, 0.0}
+property managedInstallLinkStyle : 0
+property managedInstallArrowType : "FilledDoubleArrow"
+
+property optionalInstallLinkColor : {0.0, 0.215686, 0.462745}
+property optionalInstallLinkStyle : 1
+property optionalInstallArrowType : ""
+
+property managedUpdateLinkColor : {0.137255, 0.368627, 0.0}
+property managedUpdateLinkStyle : 1
+property managedUpdateArrowType : "FilledDoubleArrow"
+
+property managedUninstallLinkColor : {0.694118, 0.0, 0.109804}
+property managedUninstallLinkStyle : 9
+property managedUninstallArrowType : "SharpBackArrow"
 
 
 --Prompt for  Manifests Directory
@@ -54,16 +84,62 @@ repeat with i in manifestList
 	set currentContainerManifest to i
 	set currentManifestPath to POSIX path of manifestsDirectory & currentContainerManifest
 	drawShape(manifestShape, currentContainerManifest, currentContainerManifest, manifestFont)
+	--get included manifests, draw and link
 	try
 		repeat
-			--set currentIncludedManifest to do shell script thePlistBuddy & " -c \"print " & ":included_manifests:" & currentIndex & "\" " & currentManifestPath
 			set currentIncludedManifest to readKey(currentManifestPath, "included_manifests", currentIndex)
 			drawShape(manifestShape, currentIncludedManifest, currentIncludedManifest, manifestFont)
-			link(currentIncludedManifest, currentContainerManifest, "straight")
+			link(currentIncludedManifest, currentContainerManifest, manifestLinkColor, defaultLineType)
 			layoutGraffle()
 			set currentIndex to currentIndex + 1
 		end repeat
+		set currentIndex to 0
 	end try
+	--get managed installs, draw and link
+	try
+		repeat
+			set currentManagedInstall to readKey(currentManifestPath, "managed_installs", currentIndex)
+			drawShape(installShape, currentManagedInstall, currentManagedInstall, installFont)
+			link(currentManagedInstall, currentContainerManifest, managedInstallLinkColor, defaultLineType)
+			layoutGraffle()
+			set currentIndex to currentIndex + 1
+		end repeat
+		set currentIndex to 0
+	end try
+	--get optional installs, draw and link
+	try
+		repeat
+			set currentOptionalInstall to readKey(currentManifestPath, "optional_installs", currentIndex)
+			drawShape(installShape, currentOptionalInstall, currentOptionalInstall, installFont)
+			link(currentOptionalInstall, currentContainerManifest, optionalInstallLinkColor, defaultLineType)
+			layoutGraffle()
+			set currentIndex to currentIndex + 1
+		end repeat
+		set currentIndex to 0
+	end try
+	--get managed updates, draw and link
+	try
+		repeat
+			set currentManagedUpdate to readKey(currentManifestPath, "managed_updates", currentIndex)
+			drawShape(installShape, currentManagedUpdate, currentManagedUpdate, installFont)
+			link(currentManagedUpdate, currentContainerManifest, managedUpdateLinkColor, defaultLineType)
+			layoutGraffle()
+			set currentIndex to currentIndex + 1
+		end repeat
+		set currentIndex to 0
+	end try
+	--get managed uninstalls, draw and link
+	try
+		repeat
+			set currentManagedUninstall to readKey(currentManifestPath, "managed_uninstalls", currentIndex)
+			drawShape(installShape, currentManagedUninstall, currentManagedUninstall, installFont)
+			link(currentManagedUninstall, currentContainerManifest, managedUninstallLinkColor, defaultLineType)
+			layoutGraffle()
+			set currentIndex to currentIndex + 1
+		end repeat
+		set currentIndex to 0
+	end try
+	
 end repeat
 
 linesToBack()
@@ -77,10 +153,10 @@ on readKey(targetFile, targetArray, targetKeyIndex)
 end readKey
 
 --link function
-on link(originShape, targetShape, propLineType)
+on link(originShape, targetShape, propLineColor, propLineType)
 	tell application "OmniGraffle"
 		tell canvas of front window
-			connect shape originShape to shape targetShape with properties {thickness:1, stroke color:{0, 0, 0}, head type:"FilledArrow", stroke pattern:0, line type:propLineType}
+			connect shape originShape to shape targetShape with properties {thickness:1, stroke color:propLineColor, head type:"FilledArrow", stroke pattern:0, line type:propLineType}
 			layout
 		end tell
 	end tell
