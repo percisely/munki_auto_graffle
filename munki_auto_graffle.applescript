@@ -37,10 +37,10 @@ set manifestList to (list folder manifestsDirectory without invisibles)
 
 
 --loop to create manifest shapes.
-repeat with theManifests in manifestList
-	set currentManifest to theManifests
-	drawShape(manifestShape, currentManifest, currentManifest, manifestFont)
-end repeat
+--repeat with theManifests in manifestList
+--	set currentManifest to theManifests
+--	drawShape(manifestShape, currentManifest, currentManifest, manifestFont)
+--end repeat
 
 
 --loop to link manifest shapes
@@ -48,14 +48,16 @@ end repeat
 --Starts from 0, asks for an item and iterates up until an error, which breaks the sub-loop and moves on to the next manifest.  
 --Will probably break if a manifest contains a manifest that doesn't exist.  
 --Potentially could be made better by using plistlib.readPlist
-repeat with theItems in manifestList
+repeat with i in manifestList
 	set currentIndex to 0
-	set currentContainerManifest to theItems
+	set currentContainerManifest to i
 	set currentManifestPath to POSIX path of manifestsDirectory & currentContainerManifest
+	drawShape(manifestShape, currentContainerManifest, currentContainerManifest, manifestFont)
 	try
 		repeat
 			--set currentIncludedManifest to do shell script thePlistBuddy & " -c \"print " & ":included_manifests:" & currentIndex & "\" " & currentManifestPath
 			set currentIncludedManifest to readKey(currentManifestPath, "included_manifests", currentIndex)
+			drawShape(manifestShape, currentIncludedManifest, currentIncludedManifest, manifestFont)
 			link(currentIncludedManifest, currentContainerManifest, "straight")
 			set currentIndex to currentIndex + 1
 		end repeat
@@ -79,11 +81,18 @@ on link(originShape, targetShape, propLineType)
 end link
 
 
---draw shapes function
+--draw shape function
+---won't draw shapes with duplicate tags, and tag is set to name.
 on drawShape(shapeProp, textProp, nameProp, fontProp)
 	tell application "OmniGraffle"
 		tell canvas of front window
-			make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, font:fontProp, size:"12", text:textProp}, origin:{135.0, 99.0}, user name:nameProp}
+			try
+				set f to first graphic whose tag is nameProp
+				return f
+			on error
+				-- not found - make a new one
+				make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, font:fontProp, size:"12", text:textProp}, origin:{135.0, 99.0}, user name:nameProp, tag:nameProp}
+			end try
 		end tell
 		layout
 	end tell
