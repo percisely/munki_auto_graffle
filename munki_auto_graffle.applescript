@@ -7,6 +7,8 @@
 --Known Issues:
 ---1. Doesn't tolerate space in path to manifests folder
 ---2. Doesn't work with installers nested in conditional_items 
+--3. Sinlge File Mode doesn't work yet
+--4. Don't seem to be picking up managed_updates
 
 --Color Hints
 ---Smokey Fern: {0.137255, 0.368627, 0.000000}
@@ -43,17 +45,35 @@ property managedUninstallLinkStyle : 9
 property managedUninstallArrowHeadType : "SharpBackArrow"
 
 
---Prompt for  Manifests Directory
-set manifestsDirectory to (choose folder with prompt "select Munki manifests directory")
 
---Prompt for mode.
+--Prompt for folder or single manifest mode
+set sourceModeChoice to button returned of (display dialog "Diagram entire manifests directory, or start from a single manifest?" buttons {"Manifests Directory", "Single Manifest"} default button "Single Manifest")
+if sourceModeChoice contains "Manifests Directory" then
+	set sourceMode to "directoryMode"
+else if sourceModeChoice contains "Single Manifest" then
+	set sourceMode to "singleFileMode"
+end if
+
+if sourceMode is equal to "directoryMode" then
+	--Prompt for  Manifests Directory
+	set manifestsDirectory to (choose folder with prompt "Select Munki manifests directory")
+	-- make a list of the manifests
+	set manifestList to (list folder manifestsDirectory without invisibles)
+else if sourceMode is equal to "singleFileMode" then
+	set theManifest to (choose file with prompt "Select Munki manifest")
+	set theManifestName to name of (info for theManifest)
+	set manifestList to {theManifestName}
+end if
+
+--Prompt for data source option.
 set displayInstallChoice to display dialog "Include Unconditional Installs and Uninstalls?" buttons {"Include Installs", "Manifests Only"} default button "Manifests Only"
 set currentInstallChoice to button returned of displayInstallChoice
 if currentInstallChoice contains "Include Installs" then
-	set theDataChoicesList to {"included_manifests", "managed_installs", "optional_installs", "managed_uninstalls"}
+	set theDataChoicesList to {"included_manifests", "managed_installs", "optional_installs", "managed_updates", "managed_uninstalls"}
 else if currentInstallChoice contains "Manifests Only" then
 	set theDataChoicesList to {"included_manifests"}
 end if
+
 
 --Fire up OmniGraffle and make a new document
 ---object separation property not working
@@ -70,28 +90,20 @@ tell application "OmniGraffle"
 end tell
 
 
--- make a list of the manifests
-set manifestList to (list folder manifestsDirectory without invisibles)
-
-
-
---loop to create manifest shapes.
---repeat with theManifests in manifestList
---	set currentManifest to theManifests
---	drawShape(manifestShape, currentManifest, currentManifest, manifestFont)
---end repeat
-
-
 --loop to link manifest shapes
---currently using plist buddy to drill into the manifest > the included_manifests key and then the individual list items.  
---Starts from 0, asks for an item and iterates up until an error, which breaks the sub-loop and moves on to the next manifest.  
---Will probably break if a manifest contains a manifest that doesn't exist.  
---Potentially could be made better by using plistlib.readPlist
+---currently using plist buddy to drill into the manifest > the included_manifests key and then the individual list items.  
+---Starts from 0, asks for an item and iterates up until an error, which breaks the sub-loop and moves on to the next manifest.  
+---Will probably break if a manifest contains a manifest that doesn't exist.  
+---Potentially could be made better by using plistlib.readPlist
 repeat with i in manifestList
 	layoutGraffle()
 	set currentIndex to 0
 	set currentContainerManifest to i
-	set currentManifestPath to POSIX path of manifestsDirectory & currentContainerManifest
+	if sourceMode is equal to "directoryMode" then
+		set currentManifestPath to POSIX path of manifestsDirectory & currentContainerManifest
+	else if sourceMode is equal to "singleFileMode" then
+		set currentManifestPath to POSIX path of theManifest
+	end if
 	drawShape(manifestShape, currentContainerManifest, currentContainerManifest, manifestFont)
 	--get included manifests, draw and link
 	try
@@ -161,6 +173,7 @@ end repeat
 
 linesToBack()
 
+--return theManifest & " " & POSIX path of theManifest & " " & manifestList
 end
 
 --plist buddy function to pull data from a specified array and key by array name and key index.  
