@@ -47,7 +47,7 @@ property managedUninstallArrowHeadType : "SharpBackArrow"
 
 
 --Prompt for folder or single manifest mode
-set sourceModeChoice to button returned of (display dialog "Diagram entire manifests directory, or start from a single manifest?" buttons {"Manifests Directory", "Single Manifest"} default button "Single Manifest")
+set sourceModeChoice to button returned of (display dialog "Diagram entire manifests directory, or start from a single manifest?" buttons {"Manifests Directory", "Single Manifest"} default button "Manifests Directory")
 if sourceModeChoice contains "Manifests Directory" then
 	set sourceMode to "directoryMode"
 else if sourceModeChoice contains "Single Manifest" then
