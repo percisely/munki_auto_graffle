@@ -183,37 +183,37 @@ repeat with i in manifestList
 end repeat
 
 --add computers from Watchman CSV
-if watchmanMode equals "true"
-set csvText to read "/Users/chulett/Downloads/computers-2017-03-27-16-29.csv"
-set theList to csvToList(csvText, {})
-set theHeaderList to item 1 of theList
-set theListWithoutHeaders to items 2 thru -1 of theList
-set theMunkiIndex to indexof("Munki Identifier", theHeaderList)
-set theWatchmanIDIndex to indexof("Watchman ID", theHeaderList)
-set theGroupIndex to indexof("Group", theHeaderList)
-set theComputerNameIndex to indexof("Computer Name", theHeaderList)
-set theSerialIndex to indexof("Serial Number", theHeaderList)
-set currentComputerAsList to {}
-repeat with i in theListWithoutHeaders
-	set currentComputerAsList to i
-	set currentComputerID to item theWatchmanIDIndex of currentComputerAsList
-	set currentComputerGroup to item theGroupIndex of currentComputerAsList
-	set currentComputerName to item theComputerNameIndex of currentComputerAsList
-	set currentComputerSerial to item theSerialIndex of currentComputerAsList
-	set currentComputerMunkiManifest to item theMunkiIndex of currentComputerAsList
-	if currentComputerMunkiManifest is not equal to "" then
-		if currentComputerMunkiManifest is not equal to "n/a" then
-			--drawShape(shapeProp, textProp, nameProp, fontProp)
-			drawShape(computerShape, currentComputerName, currentComputerID, computerFont)
-			drawShape(groupShape, currentComputerGroup, currentComputerGroup, groupFont)
-			drawShape(manifestShape, currentComputerMunkiManifest, currentComputerMunkiManifest, manifestFont)
-			--link(originShape, targetShape, propLineColor, propLineType, propHeadType, propStrokePattern)
-			link(currentComputerName, currentComputerGroup, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
-			
-			link(currentComputerMunkiManifest, currentComputerName, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
+if watchmanMode is equal to "true" then
+	set csvText to read theWatchmanCSV
+	set theList to csvToList(csvText, {})
+	set theHeaderList to item 1 of theList
+	set theListWithoutHeaders to items 2 thru -1 of theList
+	set theMunkiIndex to indexof("Munki Identifier", theHeaderList)
+	set theWatchmanIDIndex to indexof("Watchman ID", theHeaderList)
+	set theGroupIndex to indexof("Group", theHeaderList)
+	set theComputerNameIndex to indexof("Computer Name", theHeaderList)
+	set theSerialIndex to indexof("Serial Number", theHeaderList)
+	set currentComputerAsList to {}
+	repeat with i in theListWithoutHeaders
+		set currentComputerAsList to i
+		set currentComputerID to item theWatchmanIDIndex of currentComputerAsList
+		set currentComputerGroup to item theGroupIndex of currentComputerAsList
+		set currentComputerName to item theComputerNameIndex of currentComputerAsList
+		set currentComputerSerial to item theSerialIndex of currentComputerAsList
+		set currentComputerMunkiManifest to item theMunkiIndex of currentComputerAsList
+		if currentComputerMunkiManifest is not equal to "" then
+			if currentComputerMunkiManifest is not equal to "n/a" then
+				--drawShape(shapeProp, textProp, nameProp, fontProp)
+				drawShape(computerShape, currentComputerName, currentComputerID, computerFont)
+				drawShape(groupShape, currentComputerGroup, currentComputerGroup, groupFont)
+				drawShape(manifestShape, currentComputerMunkiManifest, currentComputerMunkiManifest, manifestFont)
+				--link(originShape, targetShape, propLineColor, propLineType, propHeadType, propStrokePattern)
+				link(currentComputerName, currentComputerGroup, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
+				
+				link(currentComputerMunkiManifest, currentComputerName, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
+			end if
 		end if
-	end if
-end repeat
+	end repeat
 end if
 
 
