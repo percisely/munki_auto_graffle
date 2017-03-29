@@ -10,21 +10,38 @@
 ---3. Sinlge File Mode doesn't work yet
 
 --Color Hints
+--Black: {0, 0, 0}
+--White: {65535, 65533, 65534}
 ---Smokey Fern: {0.137255, 0.368627, 0.000000}
 ---Ocean: {0.000000, 0.215686, 0.462745}
 ---Cayane: {0.694118, 0.000000, 0.109804}
+---LEGO Theme
+----Yellow: {65535, 65535, 0} --yellow
+----Blue: {0, 0, 65535} --blue
+----Red: {65535, 0, 0} --red
+----Green: {0, 65535, 0} --green
 
 property defaultLineType : "Straight"
 
 property manifestShape : "NoteShape"
 property installShape : "Cube"
-property computerShape : "Hexagon"
+property computerShape : "Octagon"
 property groupShape : "Circle"
+
+property manifestShapeColor : {65535, 65535, 0} --yellow
+property installShapeColor : {0, 65535, 0} --green
+property computerShapeColor : {65535, 0, 0} --red
+property groupShapeColor : {0, 0, 65535} --blue
 
 property manifestFont : "Helvetica"
 property installFont : "Helvetica"
 property computerFont : "Helvetica"
 property groupFont : "Helvetica"
+
+property manifestFontColor : {0, 0, 0}
+property installFontColor : {65535, 65533, 65534}
+property computerFontColor : {0, 0, 0}
+property groupFontColor : {65535, 65533, 65534}
 
 
 property manifestLinkColor : {0, 0, 0}
@@ -67,7 +84,7 @@ else if sourceMode is equal to "singleFileMode" then
 	set manifestList to {theManifestName}
 end if
 
---Prompt for folder or single manifest mode
+--Prompt for folder or single manifest mode.  Could add option to try to curl it from https://<vanity>.monitoringclient.com/computers.csv?direction=asc&sort=group
 set watchmanModeChoice to button returned of (display dialog "Include computer data from Watchman?  Requires .csv export from Watchman Monitoring." buttons {"Include Computers", "Manifests Only"} default button "Manifests Only")
 if watchmanModeChoice contains "Include Computers" then
 	set watchmanMode to "true"
@@ -115,14 +132,14 @@ repeat with i in manifestList
 	else if sourceMode is equal to "singleFileMode" then
 		set currentManifestPath to POSIX path of theManifest
 	end if
-	drawShape(manifestShape, currentContainerManifest, currentContainerManifest, manifestFont)
+	drawShape(manifestShape, currentContainerManifest, currentContainerManifest, manifestFont, manifestFontColor, manifestShapeColor)
 	--get included manifests, draw and link
 	try
 		repeat
 			set currentIncludedManifest to readKey(currentManifestPath, "included_manifests", currentIndex)
-			drawShape(manifestShape, currentIncludedManifest, currentIncludedManifest, manifestFont)
+			drawShape(manifestShape, currentIncludedManifest, currentIncludedManifest, manifestFont, manifestFontColor, manifestShapeColor)
 			link(currentIncludedManifest, currentContainerManifest, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
-			layoutGraffle()
+			--layoutGraffle()
 			set currentIndex to currentIndex + 1
 		end repeat
 		set currentIndex to 0
@@ -132,9 +149,9 @@ repeat with i in manifestList
 		try
 			repeat
 				set currentManagedInstall to readKey(currentManifestPath, "managed_installs", currentIndex)
-				drawShape(installShape, currentManagedInstall, currentManagedInstall, installFont)
+				drawShape(installShape, currentManagedInstall, currentManagedInstall, installFont, installFontColor, installShapeColor)
 				link(currentManagedInstall, currentContainerManifest, managedInstallLinkColor, defaultLineType, managedInstallArrowHeadType, managedInstallLinkStyle)
-				layoutGraffle()
+				--layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
 			set currentIndex to 0
@@ -145,9 +162,9 @@ repeat with i in manifestList
 		try
 			repeat
 				set currentOptionalInstall to readKey(currentManifestPath, "optional_installs", currentIndex)
-				drawShape(installShape, currentOptionalInstall, currentOptionalInstall, installFont)
+				drawShape(installShape, currentOptionalInstall, currentOptionalInstall, installFont, installFontColor, installShapeColor)
 				link(currentOptionalInstall, currentContainerManifest, optionalInstallLinkColor, defaultLineType, optionalInstallArrowHeadType, optionalInstallLinkStyle)
-				layoutGraffle()
+				--layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
 			set currentIndex to 0
@@ -158,9 +175,9 @@ repeat with i in manifestList
 		try
 			repeat
 				set currentManagedUpdate to readKey(currentManifestPath, "managed_updates", currentIndex)
-				drawShape(installShape, currentManagedUpdate, currentManagedUpdate, installFont)
+				drawShape(installShape, currentManagedUpdate, currentManagedUpdate, installFont, installFontColor, installShapeColor)
 				link(currentManagedUpdate, currentContainerManifest, managedUpdateLinkColor, defaultLineType, managedUpdateArrowHeadType, managedUpdateLinkStyle)
-				layoutGraffle()
+				--layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
 			set currentIndex to 0
@@ -171,9 +188,9 @@ repeat with i in manifestList
 		try
 			repeat
 				set currentManagedUninstall to readKey(currentManifestPath, "managed_uninstalls", currentIndex)
-				drawShape(installShape, currentManagedUninstall, currentManagedUninstall, installFont)
+				drawShape(installShape, currentManagedUninstall, currentManagedUninstall, installFont, installFontColor, installShapeColor)
 				link(currentManagedUninstall, currentContainerManifest, managedUninstallLinkColor, defaultLineType, managedUninstallArrowHeadType, managedUninstallLinkStyle)
-				layoutGraffle()
+				--layoutGraffle()
 				set currentIndex to currentIndex + 1
 			end repeat
 			set currentIndex to 0
@@ -204,12 +221,11 @@ if watchmanMode is equal to "true" then
 		if currentComputerMunkiManifest is not equal to "" then
 			if currentComputerMunkiManifest is not equal to "n/a" then
 				--drawShape(shapeProp, textProp, nameProp, fontProp)
-				drawShape(computerShape, currentComputerName, currentComputerID, computerFont)
-				drawShape(groupShape, currentComputerGroup, currentComputerGroup, groupFont)
-				drawShape(manifestShape, currentComputerMunkiManifest, currentComputerMunkiManifest, manifestFont)
+				drawShape(computerShape, currentComputerName, currentComputerID, computerFont, computerFontColor, computerShapeColor)
+				drawShape(groupShape, currentComputerGroup, currentComputerGroup, groupFont, groupFontColor, groupShapeColor)
+				drawShape(manifestShape, currentComputerMunkiManifest, currentComputerMunkiManifest, manifestFont, manifestFontColor, manifestShapeColor)
 				--link(originShape, targetShape, propLineColor, propLineType, propHeadType, propStrokePattern)
 				link(currentComputerName, currentComputerGroup, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
-				
 				link(currentComputerMunkiManifest, currentComputerName, manifestLinkColor, defaultLineType, manifestArrowHeadType, manifestLinkStyle)
 			end if
 		end if
@@ -243,7 +259,7 @@ end link
 
 --draw shape function
 ---won't draw shapes with duplicate tags, and tag is set to name.
-on drawShape(shapeProp, textProp, nameProp, fontProp)
+on drawShape(shapeProp, textProp, nameProp, fontProp, fontColorProp, shapeColorProp)
 	tell application "OmniGraffle"
 		tell canvas of front window
 			try
@@ -251,7 +267,7 @@ on drawShape(shapeProp, textProp, nameProp, fontProp)
 				return f
 			on error
 				-- not found - make a new one
-				make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, draws shadow:false, font:fontProp, size:"12", text:textProp}, origin:{135.0, 99.0}, user name:nameProp, tag:nameProp}
+				make new shape at end of graphics with properties {name:shapeProp, size:{144.0, 144.0}, text:{alignment:center, draws shadow:false, font:fontProp, size:"12", color:fontColorProp, text:textProp}, origin:{135.0, 99.0}, fill color:shapeColorProp, user name:nameProp, tag:nameProp}
 			end try
 		end tell
 		layout
@@ -417,7 +433,7 @@ on trim(txt, trimming)
 end trim
 
 #set csvText to "caiv2,2010BBDGRC,\"President, Board of Directors\"" & linefeed & "Another line, for demo purposes"
-csvToList(csvText, {})
+#csvToList(csvText, {})
 --> {{"caiv2", "2010BBDGRC", "President, Board of Directors"}, {"Another line", "for demo purposes"}}
 
 
