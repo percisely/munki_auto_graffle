@@ -107,7 +107,7 @@ end if
 ---object separation property not working
 tell application "OmniGraffle"
 	activate
-	make new document with properties {template:"Auto-Resizing"}
+	make new document with properties {template:"Flexible"}
 	set properties of first canvas of first document to {layout info:{automatic layout:true, type:hierarchical, direction:top to bottom, object separation:1.0, rank separation:5}}
 end tell
 
